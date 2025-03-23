@@ -19,7 +19,7 @@ app.post('/api/count', (req, res) => {
 });
 
 // GET API to show the total API count usage in the browser
-app.get('/api/count', (req, res) => {
+app.get('/', (req, res) => {
     // Send HTML response to display the total API count
     res.send(`
         <html>

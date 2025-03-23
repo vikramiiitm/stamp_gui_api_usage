@@ -58,8 +58,8 @@ app.post('/api/usage', async (req, res) => {
   }
 });
 
-app.listen(port, () => { // Add app.listen() here.
-  console.log(`Server listening at http://localhost:${port}`);
-});
+// app.listen(port, () => { // Add app.listen() here.
+//   console.log(`Server listening at http://localhost:${port}`);
+// });
 
 module.exports = app; // Keep this line for Vercel

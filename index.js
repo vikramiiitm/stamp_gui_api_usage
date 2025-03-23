@@ -38,7 +38,9 @@ app.get('/', async (req, res) => {
     res.status(500).send('Internal server error.');
   }
 });
-
+app.get('/test', (req, res) => {
+    res.send('test route works');
+});
 app.post('/api/usage', async (req, res) => {
   try {
     const currentCount = parseInt(await fs.readFile(countFilePath, 'utf8'));

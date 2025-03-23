@@ -1,15 +1,12 @@
 {
-  "name": "stamp_gui_api_usage",
+  "name": "api-counter",
   "version": "1.0.0",
-  "description": "",
+  "description": "Simple API counter",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^4.21.2"
-  }
+  "license": "ISC"
 }

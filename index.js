@@ -1,75 +1,67 @@
-const http = require('http');
-const fs = require('fs').promises;
-const path = require('path');
-const url = require('url');
+const express = require('express');
+const app = express();
 
-const countFilePath = path.join(process.cwd(), 'api_count.txt');
+// Middleware to parse JSON bodies
+app.use(express.json());
 
-async function initializeCount() {
-  try {
-    await fs.access(countFilePath);
-  } catch (error) {
-    await fs.writeFile(countFilePath, '0');
-  }
-}
+// Variable to store the total API count
+let totalApiCount = 0;
 
-initializeCount();
+// POST API to accept payload and increment the total API count
+app.post('/api/count', (req, res) => {
+    const { count } = req.body;
+    if (typeof count === 'number') {
+        totalApiCount += count;
+        res.status(200).json({ message: 'Count updated successfully', totalApiCount });
+    } else {
+        res.status(400).json({ error: 'Invalid payload. Expected a number.' });
+    }
+});
 
-const server = http.createServer(async (req, res) => {
-  const parsedUrl = url.parse(req.url, true);
-  const pathname = parsedUrl.pathname;
-
-  if (pathname === '/') {
-    try {
-      const currentCount = parseInt(await fs.readFile(countFilePath, 'utf8'));
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      res.end(`
-        <!DOCTYPE html>
+// GET API to show the total API count usage in the browser
+app.get('/api/count', (req, res) => {
+    // Send HTML response to display the total API count
+    res.send(`
         <html>
-        <head>
-          <title>API Usage Count</title>
-        </head>
-        <body>
-          <h1>Total API Usage Count: ${currentCount}</h1>
-        </body>
+            <head>
+                <title>API Count Usage</title>
+                <style>
+                    body {
+                        font-family: Arial, sans-serif;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        background-color: #f0f0f0;
+                    }
+                    .count-container {
+                        background-color: #fff;
+                        padding: 20px;
+                        border-radius: 8px;
+                        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                        text-align: center;
+                    }
+                    .count {
+                        font-size: 2em;
+                        color: #333;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="count-container">
+                    <h1>Total API Count Usage</h1>
+                    <p class="count">${totalApiCount}</p>
+                </div>
+            </body>
         </html>
-      `);
-    } catch (error) {
-      console.error('Error reading usage count:', error);
-      res.writeHead(500, { 'Content-Type': 'text/plain' });
-      res.end('Internal server error.');
-    }
-  } else if (pathname === '/api/usage' && req.method === 'GET') {
-    try {
-      const currentCount = parseInt(await fs.readFile(countFilePath, 'utf8'));
-      let increment = parseInt(parsedUrl.query.count) || 1;
-
-      if (typeof increment !== 'number' || isNaN(increment)) {
-        res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Invalid count in query parameter.' }));
-        return;
-      }
-
-      const newCount = currentCount + increment;
-      await fs.writeFile(countFilePath, newCount.toString());
-
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ message: 'Usage count updated successfully.', count: newCount }));
-    } catch (error) {
-      console.error('Error updating usage count:', error);
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Internal server error.' }));
-    }
-  } else {
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('Not Found');
-  }
+    `);
 });
 
-const port = process.env.PORT || 3000; // Use environment variable for port, or default to 3000
-
-server.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
 
-module.exports = server;
+// Export the app for Vercel
+module.exports = app;
